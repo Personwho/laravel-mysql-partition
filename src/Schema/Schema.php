@@ -2,11 +2,11 @@
 
 namespace Brokenice\LaravelMysqlPartition\Schema;
 
+use Illuminate\Support\Facades\DB;
+use Brokenice\LaravelMysqlPartition\Models\Partition;
+use Illuminate\Support\Facades\Schema as IlluminateSchema;
 use Brokenice\LaravelMysqlPartition\Exceptions\UnexpectedValueException;
 use Brokenice\LaravelMysqlPartition\Exceptions\UnsupportedPartitionException;
-use Brokenice\LaravelMysqlPartition\Models\Partition;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema as IlluminateSchema;
 
 /**
  * Class PartitionHelper method.
@@ -128,7 +128,7 @@ class Schema extends IlluminateSchema
         $query .= "PARTITION `nov` VALUES LESS THAN (12),";
         $query .= "PARTITION `dec` VALUES LESS THAN (13)";
         $query .= ")";
-        DB::unprepared(DB::raw($query));
+        DB::unprepared(DB::raw($query)->getValue(DB::connection()->getQueryGrammar()));
     }
 
     /**
@@ -170,7 +170,7 @@ class Schema extends IlluminateSchema
         } else {
             $query .= ")";
         }
-        DB::unprepared(DB::raw($query));
+        DB::unprepared(DB::raw($query)->getValue(DB::connection()->getQueryGrammar()));
     }
 
     /**
@@ -193,7 +193,7 @@ class Schema extends IlluminateSchema
             $query .= ", PARTITION future VALUES LESS THAN (MAXVALUE)";
         }
         $query = trim(trim($query),',') . ')';
-        DB::unprepared(DB::raw($query));
+        DB::unprepared(DB::raw($query)->getValue(DB::connection()->getQueryGrammar()));
 
     }
 
@@ -234,7 +234,7 @@ class Schema extends IlluminateSchema
         $query = "ALTER TABLE {$appendSchema}{$table} PARTITION BY LIST({$column}) (";
         $query .= self::implodePartitions($partitions);
         $query .= ')';
-        DB::unprepared(DB::raw($query));
+        DB::unprepared(DB::raw($query)->getValue(DB::connection()->getQueryGrammar()));
     }
 
     /**
@@ -252,7 +252,7 @@ class Schema extends IlluminateSchema
         self::assertSupport();
         $query = "ALTER TABLE {$appendSchema}{$table} PARTITION BY HASH({$hashColumn}) ";
         $query .= "PARTITIONS {$partitionsNumber};";
-        DB::unprepared(DB::raw($query));
+        DB::unprepared(DB::raw($query)->getValue(DB::connection()->getQueryGrammar()));
     }
 
     /**
@@ -269,7 +269,7 @@ class Schema extends IlluminateSchema
             self::assertSupport();
             $query = "ALTER TABLE {$appendSchema}{$table} PARTITION BY KEY() ";
             $query .= "PARTITIONS {$partitionsNumber};";
-            DB::unprepared(DB::raw($query));
+            DB::unprepared(DB::raw($query)->getValue(DB::connection()->getQueryGrammar()));
         }
 
     /**
